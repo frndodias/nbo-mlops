@@ -1,0 +1,35 @@
+# ============================================================
+# Vibe NBO — MLOps end-to-end (Databricks Asset Bundle)
+#
+# Ajuste para o SEU ambiente:
+#   1. Preencha workspace.host no target `dev` (ou use --profile no deploy)
+#   2. Ajuste as variáveis `catalog` e `schema` abaixo
+#
+# Deploy:   databricks bundle deploy --target dev
+# Rodar:    databricks bundle run nbo_pipeline --target dev
+# ============================================================
+
+bundle:
+  name: vibe-nbo-mlops
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog onde os assets do NBO vivem
+    default: fernando_custodio
+  schema:
+    description: Schema dentro do catálogo
+    default: nbo
+
+targets:
+  dev:
+    default: true
+    mode: development
+    # Preencha o host do SEU workspace (ou rode com --profile <perfil>):
+    # workspace:
+    #   host: https://SEU-WORKSPACE.cloud.databricks.com
+    variables:
+      catalog: fernando_custodio   # <-- TROQUE para o SEU catálogo
+      schema: nbo                  # <-- TROQUE para o SEU schema

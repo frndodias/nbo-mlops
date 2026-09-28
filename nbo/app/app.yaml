@@ -1,0 +1,18 @@
+command: ["streamlit", "run", "app.py", "--server.port", "8000", "--server.address", "0.0.0.0"]
+
+# Ajuste os valores para o SEU ambiente antes de fazer deploy do app.
+env:
+  - name: LAKEBASE_HOST
+    value: "SEU-LAKEBASE-HOST.database.cloud.databricks.com"
+  - name: LAKEBASE_ENDPOINT
+    value: "projects/nbo-app/branches/production/endpoints/primary"
+  - name: LAKEBASE_DB
+    value: "databricks_postgres"
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: "SEU_WAREHOUSE_ID"
+  - name: SERVING_ENDPOINT
+    value: "nbo-score-oferta"
+  - name: UC_CATALOG
+    value: "fernando_custodio"
+  - name: UC_SCHEMA
+    value: "nbo"

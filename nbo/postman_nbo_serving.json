@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "Vibe NBO - Model Serving",
+    "description": "Chamada REST ao endpoint de Model Serving 'nbo-score-oferta' (Vibe NBO). Preencha as variáveis databricks_host e databricks_token na aba Variables da collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "databricks_host",
+      "value": "SEU-WORKSPACE.cloud.databricks.com",
+      "type": "string",
+      "description": "Host do workspace, SEM https:// e sem barra final"
+    },
+    {
+      "key": "databricks_token",
+      "value": "",
+      "type": "string",
+      "description": "Personal Access Token do Databricks (Settings > Developer > Access tokens)"
+    },
+    {
+      "key": "endpoint_name",
+      "value": "nbo-score-oferta",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "NBO - invocations (Maria, 4 ofertas)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{databricks_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "https://{{databricks_host}}/serving-endpoints/{{endpoint_name}}/invocations",
+          "protocol": "https",
+          "host": ["{{databricks_host}}"],
+          "path": ["serving-endpoints", "{{endpoint_name}}", "invocations"]
+        },
+        "body": {
+          "mode": "raw",
+          "options": { "raw": { "language": "json" } },
+          "raw": "{\n  \"dataframe_records\": [\n    { \"customer_id\": 1, \"tipo_oferta\": \"cashback\",          \"nivel_agressividade\": 3 },\n    { \"customer_id\": 1, \"tipo_oferta\": \"desconto_parceiro\", \"nivel_agressividade\": 1 },\n    { \"customer_id\": 1, \"tipo_oferta\": \"bonus_vibes\",       \"nivel_agressividade\": 2 },\n    { \"customer_id\": 1, \"tipo_oferta\": \"missao\",            \"nivel_agressividade\": 1 }\n  ]\n}"
+        },
+        "description": "Retorna P(aceitar) por candidata em 'predictions'. Espelha o w.serving_endpoints.query(name='nbo-score-oferta', dataframe_records=cands) do notebook."
+      }
+    }
+  ]
+}

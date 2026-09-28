@@ -1,0 +1,92 @@
+# ============================================================
+# Pipeline NBO end-to-end — roda os notebooks em ordem.
+# Cada task recebe catalog/schema via base_parameters (variáveis do bundle),
+# que os notebooks leem por widget.
+#
+# Núcleo ML (só precisa de Unity Catalog). As etapas de Lakebase/serving/app
+# (05_online_store, 06_serving_rt, 08_motor_oferta, 09_load_base_lakebase)
+# ficam de fora do job por dependerem de infra extra (Lakebase, endpoint) —
+# veja o README para habilitá-las depois.
+# ============================================================
+
+resources:
+  jobs:
+    nbo_pipeline:
+      name: "[${bundle.target}] Vibe NBO — pipeline ML"
+
+      job_clusters:
+        - job_cluster_key: nbo_cluster
+          new_cluster:
+            spark_version: "16.4.x-cpu-ml-scala2.12"   # ML Runtime (necessário p/ Feature Eng + MLflow)
+            node_type_id: "i3.xlarge"                    # AWS — ajuste para o seu cloud/porte
+            data_security_mode: "SINGLE_USER"            # ML Runtime não roda em Shared
+            num_workers: 1
+
+      tasks:
+        - task_key: gerar_dados
+          job_cluster_key: nbo_cluster
+          notebook_task:
+            notebook_path: ../nbo/01_gerar_dados.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: features_e_selecao
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: gerar_dados
+          notebook_task:
+            notebook_path: ../nbo/02_features_e_selecao.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: feature_store
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: features_e_selecao
+          notebook_task:
+            notebook_path: ../nbo/03_feature_store.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: treino_modelo
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: feature_store
+          notebook_task:
+            notebook_path: ../nbo/04_treino_modelo.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: registrar_modelo
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: treino_modelo
+          notebook_task:
+            notebook_path: ../nbo/04b_registrar.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: score_batch
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: registrar_modelo
+          notebook_task:
+            notebook_path: ../nbo/06_score_batch.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+
+        - task_key: score_base
+          job_cluster_key: nbo_cluster
+          depends_on:
+            - task_key: score_batch
+          notebook_task:
+            notebook_path: ../nbo/07_score_base.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
