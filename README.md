@@ -1,4 +1,4 @@
-# Vibe NBO — MLOps end-to-end no Databricks
+# NBO — MLOps end-to-end no Databricks
 
 Demo de **ciclo completo de ML (MLOps)** sobre um caso de **Next Best Offer (NBO)** para um programa de pontos/recompensa. Cobre os 4 pilares:
 
